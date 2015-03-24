@@ -19,7 +19,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   // Process the webhook
   $request_event = $_SERVER['HTTP_X_BUILDKITE_EVENT'];
   $request_token = $_SERVER['HTTP_X_BUILDKITE_TOKEN'];
-  $request_body = http_get_request_body();
+  $request_body = file_get_contents('php://input');
 
   $logger->addInfo("Webhook event: {$request_event}");
   $logger->addInfo("Webhook token: {$request_token}");
