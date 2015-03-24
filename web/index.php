@@ -2,7 +2,7 @@
 require('../vendor/autoload.php');
 
 // Logger setup
-$log_handler = new Monolog\Handler\StreamHandler("php://stdout", Logger::WARNING);
+$log_handler = new Monolog\Handler\StreamHandler("php://stdout", Monolog\Logger::WARNING);
 $log_handler->setFormatter(new Monolog\Formatter\LineFormatter("%message%"));
 $logger = new Monolog\Logger("log");
 $logger->pushHandler($log_hander);
