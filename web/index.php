@@ -5,7 +5,7 @@ require('../vendor/autoload.php');
 $log_handler = new Monolog\Handler\StreamHandler("php://stdout", Monolog\Logger::WARNING);
 $log_handler->setFormatter(new Monolog\Formatter\LineFormatter("%message%"));
 $logger = new Monolog\Logger("log");
-$logger->pushHandler($log_hander);
+$logger->pushHandler($log_handler);
 
 // Fetch the expected config environment variables
 $lifx_access_token = getenv('LIFX_ACCESS_TOKEN');
