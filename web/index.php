@@ -16,8 +16,6 @@ $webhook_token     = getenv('WEBHOOK_TOKEN');
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
-  $logger->addInfo(print_r($_SERVER, true));
-
   // Process the webhook
   $request_event = $_SERVER['HTTP_X_BUILDKITE_EVENT'];
   $request_webhook_token = $_SERVER['HTTP_X_BUILDKITE_TOKEN'];
