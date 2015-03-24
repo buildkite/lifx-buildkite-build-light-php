@@ -3,7 +3,7 @@ require('../vendor/autoload.php');
 
 // Logger setup
 $log_handler = new Monolog\Handler\StreamHandler("php://stdout", Monolog\Logger::WARNING);
-$log_handler->setFormatter(new Monolog\Formatter\LineFormatter('%message%'));
+$log_handler->setFormatter(new Monolog\Formatter\LineFormatter("%message%"));
 $logger = new Monolog\Logger("log");
 $logger->pushHandler($log_handler);
 
@@ -13,7 +13,6 @@ $bulb_selector     = getenv('BULB_SELECTOR');
 $project_name      = getenv('PROJECT_NAME');
 $branch_name       = getenv('BRANCH_NAME');
 $webhook_token     = getenv('WEBHOOK_TOKEN');
-%>
 
 <% if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
