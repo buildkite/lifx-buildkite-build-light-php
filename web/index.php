@@ -18,14 +18,32 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
   // Process the webhook
   $request_event = $_SERVER['HTTP_X_BUILDKITE_EVENT'];
-  $request_token = $_SERVER['HTTP_X_BUILDKITE_TOKEN'];
+  $request_webhook_token = $_SERVER['HTTP_X_BUILDKITE_TOKEN'];
   $request_body = file_get_contents('php://input');
+  $request_json = json_decode($request_body, true);
 
   $logger->addInfo("Webhook event: {$request_event}");
-  $logger->addInfo("Webhook token: {$request_token}");
+  $logger->addInfo("Webhook token: {$request_webhook_token}");
   $logger->addInfo("Webhook request: {$request_body}");
 
-  // TODO: Post to LIFX
+  if ($request_token != $request_webhook_token) {
+    http_response_code(401);
+    throw new Exception("Webhook token is invalid");
+  }
+
+  if ($request_event == 'build') {
+    switch ($request_json['build']['state']) {
+      case 'running':
+        $logger->addInfo('Build running');
+        break;
+      case 'passed':
+        $logger->addInfo('Build passed');
+        break;
+      case 'failed':
+        $logger->addInfo('Build failed');
+        break;
+    }
+  }
 
 } else {
 ?>
