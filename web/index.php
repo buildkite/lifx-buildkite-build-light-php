@@ -19,8 +19,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   $logger->addInfo(print_r($_SERVER, true));
 
   // Process the webhook
-  $request_event = getallheaders()['HTTP_X_BUILDKITE_EVENT'];
-  $request_webhook_token = getallheaders()['HTTP_X_BUILDKITE_TOKEN'];
+  $request_event = $_SERVER['HTTP_X_BUILDKITE_EVENT'];
+  $request_webhook_token = $_SERVER['HTTP_X_BUILDKITE_TOKEN'];
   $request_body = file_get_contents('php://input');
   $request_json = json_decode($request_body, true);
 
@@ -28,9 +28,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   $logger->addInfo("Webhook token: {$request_webhook_token}");
   $logger->addInfo("Webhook request: {$request_body}");
 
-  if ($request_token != $request_webhook_token) {
+  if ($webhook_token != $request_webhook_token) {
     http_response_code(401);
-    $logger->addInfo("{$request_token} doesn't match expected webhook token {$webhook_token}");
+    $logger->addInfo("{$request_webhook_token} doesn't match expected webhook token {$webhook_token}");
     throw new Exception("Webhook token is invalid");
   }
 
