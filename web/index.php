@@ -22,26 +22,49 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   $request_body = file_get_contents('php://input');
   $request_json = json_decode($request_body, true);
 
-  $logger->addInfo("Webhook event: {$request_event}");
-  $logger->addInfo("Webhook token: {$request_webhook_token}");
-  $logger->addInfo("Webhook request: {$request_body}");
-
+  // Check the token for security
   if ($webhook_token != $request_webhook_token) {
     http_response_code(401);
     $logger->addInfo("{$request_webhook_token} doesn't match expected webhook token {$webhook_token}");
     throw new Exception("Webhook token is invalid");
   }
 
+  // Process the build and notify LIFX
   if ($request_event == 'build') {
     switch ($request_json['build']['state']) {
       case 'running':
         $logger->addInfo('Build running');
+        post_to_lifx("/v1beta1/lights/{$bulb_selector}/effects/breathe.json", [
+          power_on   => false,
+          color      => "yellow brightness:5%",
+          from_color => "yellow brightness:35%",
+          period     => 5,
+          cycles     => 9999,
+          persist    => true
+        ]);
         break;
       case 'passed':
         $logger->addInfo('Build passed');
+        post_to_lifx("/v1beta1/lights/{$bulb_selector}/effects/breathe.json", [
+          power_on   => false,
+          color      => "green brightness:75%",
+          from_color => "green brightness:10%",
+          period     => 0.45,
+          cycles     => 3,
+          persist    => true,
+          peak       => 0.2
+        ]);
         break;
       case 'failed':
-        $logger->addInfo('Build failed');
+        post_to_lifx("/v1beta1/lights/{$bulb_selector}/effects/breathe.json", [
+          power_on   => false,
+          color      => "red brightness:60%",
+          from_color => "red brightness:25%",
+          period     => 0.1,
+          cycles     => 20,
+          persist    => true,
+          peak       => 0.2
+        ]);
         break;
     }
   }
@@ -51,7 +74,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   <div style="font:24px Avenir,Helvetica;max-width:32em;margin:2em;line-height:1.3">
     <h1 style="font-size:1.5em">Huzzah! You’re almost there.</h1>
     <p style="color:#666">Now create a webhook in your <a href="https://buildkite.com/" style="color:black">Buildkite</a> notification settings with this URL, and the webhook token from the Heroku app’s config&nbsp;variables.</p>
-    <p>https://<? echo $_SERVER["SERVER_NAME"] ?>/</p>
+    <p>https://<?= $_SERVER["SERVER_NAME"] ?>/</p>
   </div>
 <?
+}
+
+function post_to_lifx($path, $params) {
+  global $lifx_access_token;
+  $json_data = json_encode($params);
+  return file_get_contents("https://api.lifx.com".$path, false, stream_context_create([
+    'http' => [
+      'method'  => 'POST',
+      'header'  => "Content-type: application/json\r\n".
+                   "Connection: close\r\n".
+                   "Content-length: ".strlen($json_data)."\r\n".
+                   "Authorization: Bearer ".$lifx_access_token."\r\n",
+      'content' => $json_data
+    ]
+  ]));
 }
