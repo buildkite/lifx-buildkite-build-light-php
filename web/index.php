@@ -14,7 +14,7 @@ $project_name      = getenv('PROJECT_NAME');
 $branch_name       = getenv('BRANCH_NAME');
 $webhook_token     = getenv('WEBHOOK_TOKEN');
 
-<% if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
   // Process the webhook
   $request_event = $_SERVER['HTTP_X_BUILDKITE_EVENT'];
