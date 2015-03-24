@@ -32,7 +32,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   <div style="font:24px Avenir,Helvetica;max-width:32em;margin:2em;line-height:1.3">
     <h1 style="font-size:1.5em">Huzzah! You’re almost there.</h1>
     <p style="color:#666">Now create a webhook in your <a href="https://buildkite.com/" style="color:black">Buildkite</a> notification settings with this URL, and the webhook token from the Heroku app’s config&nbsp;variables:</p>
-    <p><? echo $_SERVER["REQUEST_SCHEME"]."://".$_SERVER["REQUEST_HOST"]."/" ?></p>
+    <p>https://<? echo $_SERVER["SERVER_NAME"] ?>/</p>
   </div>
 <?
 }
