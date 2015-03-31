@@ -1,5 +1,2 @@
 {
-  "require" : {
-    "monolog/monolog": "~1.7"
-  }
 }

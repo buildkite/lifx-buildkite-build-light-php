@@ -1,39 +1,30 @@
 <?php
-require('../vendor/autoload.php');
-
-// Logger setup
-$log_handler = new Monolog\Handler\StreamHandler("php://stdout", Monolog\Logger::INFO);
-$log_handler->setFormatter(new Monolog\Formatter\LineFormatter("%message%"));
-$logger = new Monolog\Logger("log");
-$logger->pushHandler($log_handler);
+require("../vendor/autoload.php");
 
 // Fetch the expected config environment variables
-$lifx_access_token = getenv('LIFX_ACCESS_TOKEN');
-$bulb_selector     = getenv('BULB_SELECTOR');
-$project_name      = getenv('PROJECT_NAME');
-$branch_name       = getenv('BRANCH_NAME');
-$webhook_token     = getenv('WEBHOOK_TOKEN');
+$lifx_access_token = getenv("LIFX_ACCESS_TOKEN");
+$bulb_selector     = getenv("BULB_SELECTOR");
+$webhook_token     = getenv("WEBHOOK_TOKEN");
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
   // Process the webhook
-  $request_event = $_SERVER['HTTP_X_BUILDKITE_EVENT'];
-  $request_webhook_token = $_SERVER['HTTP_X_BUILDKITE_TOKEN'];
-  $request_body = file_get_contents('php://input');
+  $request_event = $_SERVER["HTTP_X_BUILDKITE_EVENT"];
+  $request_webhook_token = $_SERVER["HTTP_X_BUILDKITE_TOKEN"];
+  $request_body = file_get_contents("php://input");
   $request_json = json_decode($request_body, true);
 
   // Check the token for security
   if ($webhook_token != $request_webhook_token) {
     http_response_code(401);
-    $logger->addInfo("{$request_webhook_token} doesn't match expected webhook token {$webhook_token}");
+    fwrite(STDOUT, "{$request_webhook_token} doesn't match expected webhook token {$webhook_token}");
     throw new Exception("Webhook token is invalid");
   }
 
   // Process the build and notify LIFX
-  if ($request_event == 'build') {
-    switch ($request_json['build']['state']) {
-      case 'running':
-        $logger->addInfo('Build running');
+  if ($request_event == "build") {
+    switch ($request_json["build"]["state"]) {
+      case "running":
+        fwrite(STDOUT, "Build running");
         post_to_lifx("/v1beta1/lights/{$bulb_selector}/effects/breathe.json", [
           power_on   => false,
           color      => "yellow brightness:5%",
@@ -43,8 +34,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
           persist    => true
         ]);
         break;
-      case 'passed':
-        $logger->addInfo('Build passed');
+      case "passed":
+        fwrite(STDOUT, "Build passed");
         post_to_lifx("/v1beta1/lights/{$bulb_selector}/effects/breathe.json", [
           power_on   => false,
           color      => "green brightness:75%",
@@ -55,7 +46,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
           peak       => 0.2
         ]);
         break;
-      case 'failed':
+      case "failed":
+        fwrite(STDOUT, "Build failed");
         post_to_lifx("/v1beta1/lights/{$bulb_selector}/effects/breathe.json", [
           power_on   => false,
           color      => "red brightness:60%",
@@ -83,13 +75,13 @@ function post_to_lifx($path, $params) {
   global $lifx_access_token;
   $json_data = json_encode($params);
   return file_get_contents("https://api.lifx.com".$path, false, stream_context_create([
-    'http' => [
-      'method'  => 'POST',
-      'header'  => "Content-type: application/json\r\n".
+    "http" => [
+      "method"  => "POST",
+      "header"  => "Content-type: application/json\r\n".
                    "Connection: close\r\n".
                    "Content-length: ".strlen($json_data)."\r\n".
                    "Authorization: Bearer ".$lifx_access_token."\r\n",
-      'content' => $json_data
+      "content" => $json_data
     ]
   ]));
 }
