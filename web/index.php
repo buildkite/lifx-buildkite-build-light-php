@@ -33,9 +33,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
   }
 
   if ($request_event == "build.finished") {
-    $build_state = $request_json["build"]["state"];
-
-    if ($build_state == "passed") {
+    if ($request_json["build"]["state"] == "passed") {
       fwrite(STDOUT, "Build passed");
       post_to_lifx("/v1beta1/lights/{$bulb_selector}/effects/breathe.json", [
         power_on   => false,
