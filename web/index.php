@@ -20,7 +20,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     throw new Exception("Webhook token is invalid");
   }
 
-  // Process the build and notify LIFX
   if ($request_event == "build.running") {
     fwrite(STDOUT, "Build running");
     post_to_lifx("/v1beta1/lights/{$bulb_selector}/effects/breathe.json", [
@@ -31,7 +30,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
       cycles     => 9999,
       persist    => true
     ]);
-  } elseif ($request_event == "build.finished") {
+  }
+
+  if ($request_event == "build.finished") {
     $build_state = $request_json["build"]["state"];
 
     if ($build_state == "passed") {
