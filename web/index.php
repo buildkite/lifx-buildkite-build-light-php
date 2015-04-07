@@ -21,43 +21,41 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
   }
 
   // Process the build and notify LIFX
-  if ($request_event == "build") {
-    switch ($request_json["build"]["state"]) {
-      case "running":
-        fwrite(STDOUT, "Build running");
-        post_to_lifx("/v1beta1/lights/{$bulb_selector}/effects/breathe.json", [
-          power_on   => false,
-          color      => "yellow brightness:5%",
-          from_color => "yellow brightness:35%",
-          period     => 5,
-          cycles     => 9999,
-          persist    => true
-        ]);
-        break;
-      case "passed":
-        fwrite(STDOUT, "Build passed");
-        post_to_lifx("/v1beta1/lights/{$bulb_selector}/effects/breathe.json", [
-          power_on   => false,
-          color      => "green brightness:75%",
-          from_color => "green brightness:10%",
-          period     => 0.45,
-          cycles     => 3,
-          persist    => true,
-          peak       => 0.2
-        ]);
-        break;
-      case "failed":
-        fwrite(STDOUT, "Build failed");
-        post_to_lifx("/v1beta1/lights/{$bulb_selector}/effects/breathe.json", [
-          power_on   => false,
-          color      => "red brightness:60%",
-          from_color => "red brightness:25%",
-          period     => 0.1,
-          cycles     => 20,
-          persist    => true,
-          peak       => 0.2
-        ]);
-        break;
+  if ($request_event == "build.running") {
+    fwrite(STDOUT, "Build running");
+    post_to_lifx("/v1beta1/lights/{$bulb_selector}/effects/breathe.json", [
+      power_on   => false,
+      color      => "yellow brightness:5%",
+      from_color => "yellow brightness:35%",
+      period     => 5,
+      cycles     => 9999,
+      persist    => true
+    ]);
+  } elseif ($request_event == "build.finished") {
+    $build_state = $request_json["build"]["state"];
+
+    if ($build_state == "passed") {
+      fwrite(STDOUT, "Build passed");
+      post_to_lifx("/v1beta1/lights/{$bulb_selector}/effects/breathe.json", [
+        power_on   => false,
+        color      => "green brightness:75%",
+        from_color => "green brightness:10%",
+        period     => 0.45,
+        cycles     => 3,
+        persist    => true,
+        peak       => 0.2
+      ]);
+    } else {
+      fwrite(STDOUT, "Build failed");
+      post_to_lifx("/v1beta1/lights/{$bulb_selector}/effects/breathe.json", [
+        power_on   => false,
+        color      => "red brightness:60%",
+        from_color => "red brightness:25%",
+        period     => 0.1,
+        cycles     => 20,
+        persist    => true,
+        peak       => 0.2
+      ]);
     }
   }
 
