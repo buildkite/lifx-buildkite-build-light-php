@@ -1,5 +1,7 @@
 <?php
-require("../vendor/autoload.php");
+if (file_exists("../vendor/autoload.php")) {
+  require("../vendor/autoload.php");
+}
 
 // Fetch the expected config environment variables
 $lifx_access_token = getenv("LIFX_ACCESS_TOKEN");
