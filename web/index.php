@@ -24,7 +24,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
   if ($request_event == "build.running") {
     fwrite(STDOUT, "Build running");
-    post_to_lifx("/v1beta1/lights/{$bulb_selector}/effects/breathe.json", [
+    post_to_lifx("/v1/lights/{$bulb_selector}/effects/breathe.json", [
       power_on   => false,
       color      => "yellow brightness:5%",
       from_color => "yellow brightness:35%",
@@ -37,7 +37,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
   if ($request_event == "build.finished") {
     if ($request_json["build"]["state"] == "passed") {
       fwrite(STDOUT, "Build passed");
-      post_to_lifx("/v1beta1/lights/{$bulb_selector}/effects/breathe.json", [
+      post_to_lifx("/v1/lights/{$bulb_selector}/effects/breathe.json", [
         power_on   => false,
         color      => "green brightness:75%",
         from_color => "green brightness:10%",
@@ -48,7 +48,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
       ]);
     } else {
       fwrite(STDOUT, "Build failed");
-      post_to_lifx("/v1beta1/lights/{$bulb_selector}/effects/breathe.json", [
+      post_to_lifx("/v1/lights/{$bulb_selector}/effects/breathe.json", [
         power_on   => false,
         color      => "red brightness:60%",
         from_color => "red brightness:25%",
